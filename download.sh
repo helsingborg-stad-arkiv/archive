@@ -59,7 +59,8 @@ wget \
   --no-parent \
   --wait=0.2 \
   --random-wait \
-  --user-agent="Mozilla/5.0 (compatible; SiteArchiver/1.0)"
+  --user-agent="Mozilla/5.0 (compatible; SiteArchiver/1.0)" \
+  || true
 
 rm "$TEMP_URLS_FILE"
 echo "✅ Main archive complete. Starting rewrite pass..."
