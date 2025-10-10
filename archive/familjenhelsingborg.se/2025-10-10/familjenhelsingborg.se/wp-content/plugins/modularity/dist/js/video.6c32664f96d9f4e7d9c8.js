@@ -1,0 +1,2 @@
+document.addEventListener("DOMContentLoaded",(function(){document.querySelectorAll(".embed .embed__poster").forEach((e=>{e.addEventListener("click",(()=>{e.parentElement.innerHTML=document.querySelector("#"+e.dataset.embedId).innerHTML}))}))}));
+//# sourceMappingURL=video.6c32664f96d9f4e7d9c8.js.map
