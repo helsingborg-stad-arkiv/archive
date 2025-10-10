@@ -1,0 +1,71 @@
+
+name: Archive Website
+
+on:
+  workflow_dispatch:
+    inputs:
+      domain:
+        description: "Enter the full URL of the website to archive (e.g. https://example.com)"
+        required: true
+        type: string
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget xmlstarlet
+
+      - name: Prepare archive folder
+        run: mkdir -p archive
+
+      - name: Get URLs from sitemap
+        id: sitemap
+        run: |
+          echo "Fetching sitemap from ${{ github.event.inputs.domain }}/sitemap.xml"
+          curl -fsSL "${{ github.event.inputs.domain }}/sitemap.xml" -o sitemap.xml || true
+          if [ ! -s sitemap.xml ]; then
+            echo "❌ No sitemap found. Aborting."
+            exit 1
+          fi
+          xmlstarlet sel -t -v "//url/loc" -n sitemap.xml > urls.txt
+          echo "✅ Found $(wc -l < urls.txt) URLs in sitemap."
+
+      - name: Archive site content
+        run: |
+          base_url="${{ github.event.inputs.domain }}"
+          target_dir="archive/$(echo $base_url | sed 's~https\?://~~;s~/~~')"
+
+          mkdir -p "$target_dir"
+
+          # Use wget to download all URLs from sitemap with external media too
+          wget \
+            --mirror \
+            --page-requisites \
+            --convert-links \
+            --adjust-extension \
+            --no-parent \
+            --domains "$(echo $base_url | sed 's~https\?://~~')" \
+            --trust-server-names \
+            --span-hosts \
+            --execute robots=off \
+            --accept-regex="$(echo $base_url | sed 's~https\?://~~')" \
+            --input-file=urls.txt \
+            --directory-prefix="$target_dir"
+
+          # Ensure all URLs are relative (wget --convert-links handles most cases)
+          find "$target_dir" -type f -name "*.html" -exec sed -i "s|$base_url||g" {} \;
+
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: archive
+          commit_message: "Archived ${{ github.event.inputs.domain }} on $(date +'%Y-%m-%d %H:%M:%S')"
