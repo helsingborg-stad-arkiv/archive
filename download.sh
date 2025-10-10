@@ -30,7 +30,12 @@ SITEMAP_URL="${SITE_URL%/}/sitemap.xml"
 TEMP_URLS_FILE=$(mktemp)
 
 echo "📥 Fetching sitemap (supports sitemap indexes): $SITEMAP_URL"
-SITEMAP_CONTENT=$(wget -qO- --max-redirect=10 "$SITEMAP_URL" || true)
+echo "🔍 Fetching sitemap from: $SITEMAP_URL"
+SITEMAP_CONTENT=$(wget -S -O- --max-redirect=10 --trust-server-names --content-on-error --no-check-certificate \
+  --user-agent="Mozilla/5.0 (compatible; SiteArchiver/1.0; +https://github.com/helsingborg-stad-arkiv)" \
+  "$SITEMAP_URL" 2>&1)
+echo "🧾 Sitemap response (first 30 lines):"
+echo "$SITEMAP_CONTENT" | head -n 30
 
 # Extract all <loc> entries
 SITEMAP_LOCS=$(echo "$SITEMAP_CONTENT" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p')
@@ -44,9 +49,9 @@ if echo "$SITEMAP_CONTENT" | grep -Eiq "<sitemapindex([[:space:]>])"; then
     echo "🔗 Fetching subsitemap: $sm"
     # Handle .gz subsitemaps too
     if [[ "$sm" =~ \.gz$ ]]; then
-      wget -qO- --max-redirect=10 "$sm" | gunzip -c | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
+      wget -qO- --max-redirect=10 --no-check-certificate "$sm" | gunzip -c | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
     else
-      wget -qO- --max-redirect=10 "$sm" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
+      wget -qO- --max-redirect=10 --no-check-certificate "$sm" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
     fi
   done
 else
@@ -55,7 +60,7 @@ else
     echo "📚 WordPress sitemap index detected — fetching subsitemaps..."
     for sm in $SITEMAP_LOCS; do
       echo "🔗 Fetching subsitemap: $sm"
-      wget -qO- --max-redirect=10 "$sm" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
+      wget -qO- --max-redirect=10 --no-check-certificate "$sm" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
     done
   else
     echo "🗺️ Regular sitemap detected."
@@ -91,6 +96,7 @@ wget \
   --wait=0.2 \
   --random-wait \
   --user-agent="Mozilla/5.0 (compatible; SiteArchiver/1.0)" \
+  --no-check-certificate \
   || true
 
 rm "$TEMP_URLS_FILE"
