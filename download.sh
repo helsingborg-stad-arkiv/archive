@@ -38,7 +38,7 @@ SITEMAP_LOCS=$(echo "$SITEMAP_CONTENT" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p')
 > "$TEMP_URLS_FILE"
 
 # Check if this is a sitemap index (namespace-safe, case-insensitive)
-if echo "$SITEMAP_CONTENT" | grep -iq "<sitemapindex[^>]*>"; then
+if echo "$SITEMAP_CONTENT" | grep -Eiq "<sitemapindex([[:space:]>])"; then
   echo "📚 Sitemap index detected — fetching subsitemaps..."
   for sm in $SITEMAP_LOCS; do
     echo "🔗 Fetching subsitemap: $sm"
@@ -50,8 +50,17 @@ if echo "$SITEMAP_CONTENT" | grep -iq "<sitemapindex[^>]*>"; then
     fi
   done
 else
-  echo "🗺️ Regular sitemap detected."
-  echo "$SITEMAP_LOCS" >> "$TEMP_URLS_FILE"
+  # If no <sitemapindex> tag but file name looks like wp-sitemap.xml, treat as index
+  if [[ "$SITEMAP_URL" =~ wp-sitemap\.xml$ ]]; then
+    echo "📚 WordPress sitemap index detected — fetching subsitemaps..."
+    for sm in $SITEMAP_LOCS; do
+      echo "🔗 Fetching subsitemap: $sm"
+      wget -qO- --max-redirect=10 "$sm" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
+    done
+  else
+    echo "🗺️ Regular sitemap detected."
+    echo "$SITEMAP_LOCS" >> "$TEMP_URLS_FILE"
+  fi
 fi
 
 URL_COUNT=$(wc -l < "$TEMP_URLS_FILE" | tr -d ' ')
