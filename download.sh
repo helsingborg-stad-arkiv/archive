@@ -29,8 +29,25 @@ mkdir -p "$ARCHIVE_DIR"
 SITEMAP_URL="${SITE_URL%/}/sitemap.xml"
 TEMP_URLS_FILE=$(mktemp)
 
-echo "📥 Fetching sitemap from: $SITEMAP_URL"
-wget -qO- "$SITEMAP_URL" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' > "$TEMP_URLS_FILE" || true
+echo "📥 Fetching sitemap (supports sitemap indexes): $SITEMAP_URL"
+SITEMAP_CONTENT=$(wget -qO- "$SITEMAP_URL" || true)
+
+# Extract all <loc> entries
+SITEMAP_LOCS=$(echo "$SITEMAP_CONTENT" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p')
+
+> "$TEMP_URLS_FILE"
+
+# Check if this is a sitemap index (contains <sitemapindex>)
+if echo "$SITEMAP_CONTENT" | grep -q "<sitemapindex"; then
+  echo "📚 Sitemap index detected — fetching subsitemaps..."
+  for sm in $SITEMAP_LOCS; do
+    echo "🔗 Fetching subsitemap: $sm"
+    wget -qO- "$sm" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
+  done
+else
+  echo "🗺️ Regular sitemap detected."
+  echo "$SITEMAP_LOCS" >> "$TEMP_URLS_FILE"
+fi
 
 URL_COUNT=$(wc -l < "$TEMP_URLS_FILE" | tr -d ' ')
 if [ "$URL_COUNT" -eq 0 ]; then
