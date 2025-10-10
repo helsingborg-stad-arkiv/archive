@@ -1,0 +1,25 @@
+				@font-face {
+					font-family: 'avenir';
+					src: url('./safeskills.rsnv.se/wp-content/uploads/useanyfont/7674Avenir.woff2') format('woff2'),
+						url('7674Avenir.woff') format('woff');
+					  font-display: auto;
+				}
+
+				.avenir{font-family: 'avenir' !important;}
+
+						@font-face {
+					font-family: 'blowbrush';
+					src: url('./safeskills.rsnv.se/wp-content/uploads/useanyfont/5231blowbrush.woff2') format('woff2'),
+						url('5231blowbrush.woff') format('woff');
+					  font-display: auto;
+				}
+
+				.blowbrush{font-family: 'blowbrush' !important;}
+
+						body{
+					font-family: 'avenir' !important;
+				}
+						.blow{
+					font-family: 'blowbrush' !important;
+				}
+		
