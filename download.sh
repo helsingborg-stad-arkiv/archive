@@ -30,7 +30,7 @@ SITEMAP_URL="${SITE_URL%/}/sitemap.xml"
 TEMP_URLS_FILE=$(mktemp)
 
 echo "📥 Fetching sitemap (supports sitemap indexes): $SITEMAP_URL"
-SITEMAP_CONTENT=$(wget -qO- "$SITEMAP_URL" || true)
+SITEMAP_CONTENT=$(wget -qO- --max-redirect=10 "$SITEMAP_URL" || true)
 
 # Extract all <loc> entries
 SITEMAP_LOCS=$(echo "$SITEMAP_CONTENT" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p')
