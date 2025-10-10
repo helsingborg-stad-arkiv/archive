@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>📦 Website Archive Browser</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; }
+  header { background: #f4f4f4; padding: 0.75rem 1rem; position: sticky; top: 0; display: flex; gap: 0.5rem; z-index: 10; align-items: center; border-bottom: 1px solid #ccc; }
+  select, button { font-size: 1rem; padding: 0.3rem 0.5rem; }
+  iframe { border: none; width: 100%; height: calc(100vh - 3rem); }
+  h1 { font-size: 1.1rem; margin-right: 0.5rem; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>📦 Archive Browser</h1>
+    <label>Domain:
+      <select id="domain"></select>
+    </label>
+    <label>Date:
+      <select id="date"></select>
+    </label>
+  </header>
+  <iframe id="preview"></iframe>
+
+  <script>
+    async function loadManifest() {
+      const res = await fetch('./index.json');
+      if (!res.ok) throw new Error('Manifest not found');
+      return await res.json();
+    }
+
+    async function init() {
+      const manifest = await loadManifest();
+      const domainSelect = document.getElementById('domain');
+      const dateSelect = document.getElementById('date');
+      const preview = document.getElementById('preview');
+
+      const domains = Object.keys(manifest).sort();
+      domainSelect.innerHTML = '<option value="">-- Select site --</option>' + 
+        domains.map(d => `<option value="${d}">${d}</option>`).join('');
+
+      domainSelect.addEventListener('change', () => {
+        const domain = domainSelect.value;
+        const dates = manifest[domain] || [];
+        dateSelect.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
+        if (dates.length) dateSelect.value = dates[dates.length - 1];
+        loadArchive();
+      });
+
+      dateSelect.addEventListener('change', loadArchive);
+
+      function loadArchive() {
+        const domain = domainSelect.value;
+        const date = dateSelect.value;
+        if (!domain || !date) return;
+        preview.src = `./${domain}/${date}/${domain}/index.html`;
+        localStorage.setItem('lastDomain', domain);
+        localStorage.setItem('lastDate', date);
+      }
+
+      // Restore previous selection
+      const lastDomain = localStorage.getItem('lastDomain');
+      const lastDate = localStorage.getItem('lastDate');
+      if (lastDomain && manifest[lastDomain]) {
+        domainSelect.value = lastDomain;
+        const dates = manifest[lastDomain];
+        dateSelect.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
+        if (lastDate && dates.includes(lastDate)) dateSelect.value = lastDate;
+        loadArchive();
+      }
+    }
+
+    init().catch(err => {
+      document.body.innerHTML = '<p style="color:red;">Error loading manifest: ' + err.message + '</p>';
+    });
+  </script>
+</body>
+</html>

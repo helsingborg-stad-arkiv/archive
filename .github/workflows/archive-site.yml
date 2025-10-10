@@ -50,6 +50,11 @@ jobs:
           # Run the download script
           bash download.sh
 
+      - name: Update archive manifest
+        run: |
+          echo "🧾 Generating archive manifest..."
+          bash build-manifest.sh
+
       - name: Commit archived files
         run: |
           git config user.name "github-actions[bot]"
