@@ -21,7 +21,7 @@
       <select id="date"></select>
     </label>
   </header>
-  <iframe id="preview" sandbox="allow-same-origin allow-scripts allow-forms" referrerpolicy="no-referrer"></iframe>
+  <iframe id="preview" referrerpolicy="no-referrer"></iframe>
 
   <script>
     async function loadManifest() {
@@ -74,6 +74,27 @@
     init().catch(err => {
       document.body.innerHTML = '<p style="color:red;">Error loading manifest: ' + err.message + '</p>';
     });
+
+    function preventExternalTargets(iframe) {
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!doc) return;
+        const links = doc.querySelectorAll('a[target="_blank"], a[target="_top"], a[target="_parent"]');
+        links.forEach(link => {
+          link.removeAttribute('target');
+        });
+      } catch(e) {
+        // Cross-origin, ignore
+      }
+    }
+
+    const preview = document.getElementById('preview');
+    preview.addEventListener('load', () => {
+      preventExternalTargets(preview);
+    });
+    setInterval(() => {
+      preventExternalTargets(preview);
+    }, 1500);
   </script>
 </body>
 </html>
