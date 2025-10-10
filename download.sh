@@ -38,13 +38,14 @@ echo "🧾 Sitemap response (first 30 lines):"
 echo "$SITEMAP_CONTENT" | head -n 30
 
 # Extract all <loc> entries
-SITEMAP_LOCS=$(echo "$SITEMAP_CONTENT" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p')
+SITEMAP_LOCS=$(echo "$SITEMAP_CONTENT" | sed 's/></>\n</g' | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p')
 
 > "$TEMP_URLS_FILE"
 
 # Check if this is a sitemap index (namespace-safe, case-insensitive)
 if echo "$SITEMAP_CONTENT" | grep -Eiq "<sitemapindex([[:space:]>])"; then
   echo "📚 Sitemap index detected — fetching subsitemaps..."
+  IFS=$'\n'
   for sm in $SITEMAP_LOCS; do
     echo "🔗 Fetching subsitemap: $sm"
     # Handle .gz subsitemaps too
@@ -54,14 +55,17 @@ if echo "$SITEMAP_CONTENT" | grep -Eiq "<sitemapindex([[:space:]>])"; then
       wget -qO- --max-redirect=10 --no-check-certificate "$sm" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
     fi
   done
+  unset IFS
 else
   # If no <sitemapindex> tag but file name looks like wp-sitemap.xml, treat as index
   if [[ "$SITEMAP_URL" =~ wp-sitemap\.xml$ ]]; then
     echo "📚 WordPress sitemap index detected — fetching subsitemaps..."
+    IFS=$'\n'
     for sm in $SITEMAP_LOCS; do
       echo "🔗 Fetching subsitemap: $sm"
       wget -qO- --max-redirect=10 --no-check-certificate "$sm" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
     done
+    unset IFS
   else
     echo "🗺️ Regular sitemap detected."
     echo "$SITEMAP_LOCS" >> "$TEMP_URLS_FILE"
