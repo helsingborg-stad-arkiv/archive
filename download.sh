@@ -14,7 +14,7 @@ fi
 
 DOMAIN=$(echo "$SITE_URL" | awk -F/ '{print $3}')
 TODAY=$(date +%Y-%m-%d)
-ARCHIVE_DIR="./${DOMAIN}/${TODAY}"
+ARCHIVE_DIR="./archive/${DOMAIN}/${TODAY}"
 
 # Convert comma-separated EXTRA_DOMAINS to an array
 IFS=',' read -ra EXTRA_DOMAINS_ARRAY <<< "$EXTRA_DOMAINS_ENV"
