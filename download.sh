@@ -37,12 +37,17 @@ SITEMAP_LOCS=$(echo "$SITEMAP_CONTENT" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p')
 
 > "$TEMP_URLS_FILE"
 
-# Check if this is a sitemap index (contains <sitemapindex>)
-if echo "$SITEMAP_CONTENT" | grep -q "<sitemapindex"; then
+# Check if this is a sitemap index (namespace-safe, case-insensitive)
+if echo "$SITEMAP_CONTENT" | grep -iq "<sitemapindex[^>]*>"; then
   echo "📚 Sitemap index detected — fetching subsitemaps..."
   for sm in $SITEMAP_LOCS; do
     echo "🔗 Fetching subsitemap: $sm"
-    wget -qO- "$sm" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
+    # Handle .gz subsitemaps too
+    if [[ "$sm" =~ \.gz$ ]]; then
+      wget -qO- --max-redirect=10 "$sm" | gunzip -c | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
+    else
+      wget -qO- --max-redirect=10 "$sm" | sed -n 's:.*<loc>\(.*\)</loc>.*:\1:p' >> "$TEMP_URLS_FILE" || true
+    fi
   done
 else
   echo "🗺️ Regular sitemap detected."
