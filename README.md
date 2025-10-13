@@ -6,10 +6,10 @@ _Archive entire websites as static snapshots before shutdown._
 ![Status: Stable](https://img.shields.io/badge/status-stable-brightgreen)
 ![Archive Tool](https://img.shields.io/badge/tool-wget-orange)
 
-> 🌐 **Live archive site:**  
+> 🗂️ **Browse archived sites:**  
 > [https://archive.helsingborg.io/archive/](https://archive.helsingborg.io/archive/)
 >
-> 🗂️ **Browse archived sites:**  
+> 🌐 **Live archive site:**  
 > [https://archive.helsingborg.io/](https://archive.helsingborg.io/)
 
 ---
