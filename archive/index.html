@@ -3,143 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <title>Website Archive</title>
-<style>
-  :root {
-    --color-bg: #ffffff;
-    --color-bg-alt: #f4f4f4;
-    --color-text: #000000;
-    --color-text-muted: #5c5c5c;
-    --color-border: #ccc;
-    --color-border-alt: #bbb;
+
+<!-- Load css / js file from ./assets/dist/manifest.json -->
+<script>
+  async function loadAssets() {
+    const res = await fetch('./assets/dist/manifest.json');
+    if (!res.ok) throw new Error('Manifest not found');
+    return await res.json();
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --color-bg: #121212;
-      --color-bg-alt: #1e1e1e;
-      --color-text: #e0e0e0;
-      --color-text-muted: #a0a0a0;
-      --color-border: #333;
-      --color-border-alt: #444;
+  async function init() {
+    const manifest = await loadAssets();
+    const head = document.head;
+    for (const [key, value] of Object.entries(manifest)) {
+
+      //Add prefix
+      const valueWithPrefix = './assets/dist/' + value;
+
+      // Detect CSS by key or value extension
+      if (key.endsWith('.css') || value.endsWith('.css')) {
+        head.appendChild(Object.assign(document.createElement('link'), {
+          rel: 'stylesheet',
+          href: valueWithPrefix
+        }));
+      } else if (key.endsWith('.js') || value.endsWith('.js')) {
+        head.appendChild(Object.assign(document.createElement('script'), {
+          src: valueWithPrefix
+        }));
+      }
     }
   }
-  body { 
-    font-family: system-ui, sans-serif; margin: 0; 
-    overflow: hidden; 
-    height: 100vh; 
-    display: flex; 
-    flex-direction: column; 
-  }
-  footer { 
-    background: var(--color-bg-alt); 
-    padding: 0.75rem 1rem; 
-    position: sticky; 
-    bottom: 0; 
-    display: flex; 
-    gap: 1rem; 
-    z-index: 1000; 
-    align-items: center; 
-    border-top: 1px solid var(--color-border); 
-    height: 3rem;
-  }
-  select, button { 
-    font-size: 1rem; 
-    padding: 0.3rem 0.5rem; 
-    color: var(--color-text); 
-    background: var(--color-bg); 
-    border: 1px solid var(--color-border); 
-    border-radius: 4px; 
-  }
+  init();
+</script>
 
-  iframe { 
-    border: none; 
-    width: 100%; 
-    height: calc(100vh - 3rem); 
-  }
-
-  #manifest-error { 
-    color: red; 
-    padding: 1rem;
-    top: 50%;
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  #url {
-    font-family: monospace;
-    font-size: 0.9rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin-left: auto;
-    color: var(--color-text-muted);
-  }
-
-  .field-container {
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    gap: 0.3rem;
-  }
-  .field-label {
-    font-size: .8rem;
-    white-space: nowrap;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-  .field {
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    background: var(--color-bg);
-    padding: 0.3rem 0.5rem;
-    font-size: 1rem;
-    max-width: 300px;
-  }
-
-  #url-container {
-    margin-left: auto;
-  }
-
-  #url-container .field {
-    background: var(--color-bg-alt);
-    border: 1px solid var(--color-border-alt);
-    cursor: default;
-    user-select: all;
-    min-width: 200px;
-    max-width: 100%;
-  }
-
-  .cover-view {
-    border: none; 
-    width: 100%; 
-    height: calc(100vh - 3rem); 
-    background: var(--color-bg);
-    color: var(--color-text);
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 1rem;
-    display: none;
-  }
-
-  /** Initial state handling **/
-
-  #preview:not([src]) {
-    display: none;
-  }
-
-  #preview:not([src]) ~ #initial-state {
-    display: flex;
-  }
-
-  #preview:not([src]) ~ footer #date-container,
-  #preview:not([src]) ~ footer #url-container {
-    display: none;
-  }
-
-</style>
 </head>
 <body>
 
@@ -173,150 +69,5 @@
   </footer>
 
   <div id="manifest-error" style="display:none;"></div>
-
-  <script>
-    async function loadManifest() {
-      const res = await fetch('./index.json');
-      if (!res.ok) throw new Error('Manifest not found');
-      return await res.json();
-    }
-
-    async function init() {
-      const manifest = await loadManifest();
-      const domainSelect = document.getElementById('domain');
-      const dateSelect = document.getElementById('date');
-      const preview = document.getElementById('preview');
-      const urlDiv = document.getElementById('url');
-
-      const domains = Object.keys(manifest).sort();
-      domainSelect.innerHTML = '<option value="">-- Select site --</option>' + 
-        domains.map(d => `<option value="${d}">${d}</option>`).join('');
-
-      function updateUrlDisplay(src, domain, date) {
-        let prefix = `/${domain}/${date}/${domain}/`;
-        console.log(src.indexOf(prefix));
-
-        if (src.indexOf(prefix) !== -1) {
-          src = src.slice(src.indexOf(prefix) + prefix.length - 1);
-        }
-        if (!src.startsWith('/')) src = '/' + src;
-
-        //Remove index.html from the end
-        if (src.endsWith('/index.html')) {
-          src = src.slice(0, -10);
-        }
-        //Remove trailing slash if not root
-        if (src.endsWith('/') && src.length > 1) {
-          src = src.slice(0, -1);
-        }
-
-        urlDiv.textContent = src;
-      }
-
-      domainSelect.addEventListener('change', () => {
-        const domain = domainSelect.value;
-        const dates = manifest[domain] || [];
-        dateSelect.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
-        if (dates.length) dateSelect.value = dates[dates.length - 1];
-        loadArchive();
-      });
-
-      dateSelect.addEventListener('change', loadArchive);
-
-      function loadArchive() {
-        const domain = domainSelect.value;
-        const date = dateSelect.value;
-        if (!domain || !date) {
-          preview.src = '';
-          urlDiv.textContent = '';
-          return;
-        }
-        const baseSrc = `./${domain}/${date}/${domain}/index.html`;
-        preview.src = baseSrc;
-        localStorage.setItem('lastDomain', domain);
-        localStorage.setItem('lastDate', date);
-        updateUrlDisplay(baseSrc, domain, date);
-      }
-
-      // Restore previous selection
-      const lastDomain = localStorage.getItem('lastDomain');
-      const lastDate = localStorage.getItem('lastDate');
-      if (lastDomain && manifest[lastDomain]) {
-        domainSelect.value = lastDomain;
-        const dates = manifest[lastDomain];
-        dateSelect.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
-        if (lastDate && dates.includes(lastDate)) dateSelect.value = lastDate;
-        loadArchive();
-      }
-
-      function preventExternalTargets(iframe) {
-        try {
-          const doc = iframe.contentDocument || iframe.contentWindow.document;
-          if (!doc) return;
-          const links = doc.querySelectorAll('a[target="_blank"], a[target="_top"], a[target="_parent"]');
-          links.forEach(link => {
-            link.removeAttribute('target');
-          });
-        } catch(e) {
-          // Cross-origin, ignore
-        }
-      }
-
-      preview.addEventListener('load', () => {
-        preventExternalTargets(preview);
-
-        try {
-          const iframeWindow = preview.contentWindow;
-          const iframeLocation = iframeWindow.location;
-          const domain = domainSelect.value;
-          const date = dateSelect.value;
-
-          updateUrlDisplay(baseSrc, domain, date);
-
-          // Attach click listener to links to update url display on navigation inside iframe
-          const doc = iframeWindow.document;
-          if (doc) {
-            doc.body.addEventListener('click', function(event) {
-              const target = event.target.closest('a');
-              if (!target) return;
-              const href = target.getAttribute('href');
-              if (!href || href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('javascript:')) return;
-              event.preventDefault();
-              let newUrl;
-              if (href.startsWith('/')) {
-                // Absolute path inside iframe origin
-                newUrl = new URL(href, iframeLocation.origin).href;
-              } else {
-                // Relative path
-                newUrl = new URL(href, iframeLocation.href).href;
-              }
-              iframeWindow.location.href = newUrl;
-            }, true);
-          }
-        } catch(e) {
-          // Cross-origin, ignore
-        }
-      });
-
-      // Periodically update url display in case navigation happens programmatically
-      setInterval(() => {
-        try {
-          const iframeWindow = preview.contentWindow;
-          const iframeLocation = iframeWindow.location;
-          const domain = domainSelect.value;
-          const date = dateSelect.value;
-          if (!domain || !date) return;
-          updateUrlDisplay(iframeLocation.pathname, domain, date);
-
-        } catch(e) {
-          // Cross-origin, ignore
-        }
-      }, 500);
-    }
-
-    init().catch(err => {
-      document.body.innerHTML = '<div id="manifest-error">Could not load site index. Reason: ' + err.message + '</div>';
-    });
-  </script>
 </body>
 </html>
