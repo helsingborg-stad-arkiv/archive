@@ -36,7 +36,7 @@ footer {
   position: sticky;
   bottom: 0;
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   z-index: 1000;
   align-items: center;
   border-top: 1px solid var(--color-border);
@@ -100,7 +100,7 @@ iframe {
 }
 
 #url-container {
-  margin-left: auto;
+  width: 100%;
 }
 
 #url-container .field {
@@ -108,8 +108,8 @@ iframe {
   border: 1px solid var(--color-border-alt);
   cursor: default;
   user-select: all;
-  min-width: 200px;
   max-width: 100%;
+  width: 100%;
 }
 
 .cover-view {

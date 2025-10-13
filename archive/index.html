@@ -28,7 +28,8 @@
         }));
       } else if (key.endsWith('.js') || value.endsWith('.js')) {
         head.appendChild(Object.assign(document.createElement('script'), {
-          src: valueWithPrefix
+          src: valueWithPrefix,
+          type: 'module'
         }));
       }
     }
