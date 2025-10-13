@@ -13,26 +13,39 @@
   }
 
   async function init() {
+    document.documentElement.style.visibility = 'hidden';
     const manifest = await loadAssets();
     const head = document.head;
-    for (const [key, value] of Object.entries(manifest)) {
+    const promises = [];
 
-      //Add prefix
+    for (const [key, value] of Object.entries(manifest)) {
       const valueWithPrefix = './assets/dist/' + value;
 
-      // Detect CSS by key or value extension
       if (key.endsWith('.css') || value.endsWith('.css')) {
-        head.appendChild(Object.assign(document.createElement('link'), {
+        const link = Object.assign(document.createElement('link'), {
           rel: 'stylesheet',
           href: valueWithPrefix
+        });
+        promises.push(new Promise(resolve => {
+          link.onload = resolve;
+          link.onerror = resolve;
         }));
+        head.appendChild(link);
       } else if (key.endsWith('.js') || value.endsWith('.js')) {
-        head.appendChild(Object.assign(document.createElement('script'), {
+        const script = Object.assign(document.createElement('script'), {
           src: valueWithPrefix,
           type: 'module'
+        });
+        promises.push(new Promise(resolve => {
+          script.onload = resolve;
+          script.onerror = resolve;
         }));
+        head.appendChild(script);
       }
     }
+
+    await Promise.all(promises);
+    document.documentElement.style.visibility = 'visible';
   }
   init();
 </script>
