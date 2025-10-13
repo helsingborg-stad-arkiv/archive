@@ -110,10 +110,49 @@
     max-width: 100%;
   }
 
+  .cover-view {
+    border: none; 
+    width: 100%; 
+    height: calc(100vh - 3rem); 
+    background: var(--color-bg);
+    color: var(--color-text);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 1rem;
+    display: none;
+  }
+
+  /** Initial state handling **/
+
+  #preview:not([src]) {
+    display: none;
+  }
+
+  #preview:not([src]) ~ #initial-state {
+    display: flex;
+  }
+
+  #preview:not([src]) ~ footer #date-container,
+  #preview:not([src]) ~ footer #url-container {
+    display: none;
+  }
+
 </style>
 </head>
 <body>
+
+  <!-- Iframe for previewing archived pages -->
   <iframe id="preview" referrerpolicy="no-referrer"></iframe>
+
+  <!-- Initial state message -->
+  <div id="initial-state" class="cover-view">
+    <h1>Archive Viewer</h1>
+    <p>Please use the dropdown menus to select a site and a date to go back in time.</p>
+  </div>
+  
+  <!-- Footer element with navigator -->
   <footer>
 
     <div id="domain-container" class="field-container">
@@ -132,6 +171,9 @@
     </div>
 
   </footer>
+
+  <div id="manifest-error" style="display:none;"></div>
+
   
 
   <script>
