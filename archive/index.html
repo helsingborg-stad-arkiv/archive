@@ -4,6 +4,22 @@
 <meta charset="UTF-8">
 <title>Website Archive</title>
 
+<!-- Prevent flashing -->
+<style>
+  :root {
+    --color-bg: #ffffff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-bg: #121212;
+    }
+  }
+  html {
+    background: var(--color-bg);
+  }
+</style>
+
 <!-- Load css / js file from ./assets/dist/manifest.json -->
 <script>
   async function loadAssets() {
