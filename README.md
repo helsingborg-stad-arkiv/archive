@@ -3,9 +3,11 @@
 This repository is used to **archive websites before shutdown** and store them as **static snapshots in a structured folder layout within the repository**.  
 It captures all pages listed in the site’s sitemap, downloads all media assets (even from CDNs), rewrites URLs to relative paths, and commits the result to the repository under a folder structure organized by domain and date.
 
+View the website @ [https://archive.helsingborg.io/](https://archive.helsingborg.io/archive/). And the archive browser @ [https://archive.helsingborg.io/](https://archive.helsingborg.io/archive/)
+
 ---
 
-## Local
+## Run script locally
 SITE_URL="https://example.cpm" \
 EXTRA_DOMAINS=("media.example.com" "cdn.example.com") \
 bash download.sh
@@ -19,12 +21,12 @@ The `EXTRA_DOMAINS` array allows you to specify additional domains from which to
 3. Every page listed is downloaded using `wget`:
    - All HTML, images, CSS, JS, and assets are saved.
    - Links are converted to **relative URLs**.
-   - External media (e.g. CDN images) from specified domains are included.
+   - External media (e.g. CDN images) from specified domains are included if domain is included in EXTRA_DOMAIN setting.
 4. The archive is stored in the repository under the folder structure:  
    **`/domain/YYYY-MM-DD/`**
 5. The workflow commits the archived files to the repository.
 
-GitHub Pages is **not published automatically**, but you can manually configure GitHub Pages to serve the archived content if desired.
+GitHub Pages can be configured to serve the archived content if desired.
 
 ---
 
@@ -38,25 +40,11 @@ GitHub Pages is **not published automatically**, but you can manually configure 
 
 ## 🚀 Usage Instructions
 
-1. **Create the repository**  
-   Example: `my-old-site-archive`
-
-2. **Add the workflow**  
-   Save the provided file as  
-   `.github/workflows/archive-site.yml`
-
-3. **Run the archiver manually**  
-   - Go to the **Actions** tab in the repository.  
-   - Select **“Archive Website”** → **“Run workflow”**.  
-   - Enter the full site URL, for example:  
-     ```
-     https://example.com
-     ```
-   - Click **Run workflow**.
-
+1. **Go to GithubActions on this repository**  
+2. Click on Archive Website"
+3. Enter the url to archive
 4. Wait for the workflow to finish. The archived site snapshot will be committed to the repository under the `/domain/YYYY-MM-DD/` folder structure.
-
-5. (Optional) Configure GitHub Pages manually in repository settings if you want to serve the archived files as a website.
+5. Visit the [`archive browser`](./archive/) to view the archived page.
 
 ---
 
@@ -65,7 +53,7 @@ GitHub Pages is **not published automatically**, but you can manually configure 
 - Uses [`wget`](https://www.gnu.org/software/wget/manual/wget.html) to mirror the website.
 - URLs are rewritten to be relative (`--convert-links`).
 - Media and assets from external domains specified in `EXTRA_DOMAINS` are downloaded and stored locally (`--span-hosts`).
-- Pages outside the original domain are **not crawled**.
+- Only pages in the sitemap.xml is archived. 
 - The workflow commits the archived snapshot to the repository under `/domain/YYYY-MM-DD/`.
 
 ---
@@ -82,28 +70,6 @@ When a site is being taken offline, run this once to permanently preserve its st
 - Only pages in the sitemap are archived.
 - Dynamic content (search results, forms, etc.) is not captured.
 - Sites requiring authentication or JavaScript rendering are not supported.
-
----
-
-## 📄 Example Output
-
-After archiving `https://example.com` on 2023-08-15, the repository structure will look like:
-
-archive/
-└── example.com/
-    └── 2023-08-15/
-        ├── index.html
-        ├── about/
-        │   └── index.html
-        ├── images/
-        ├── css/
-        └── js/
-
----
-
-## 🧹 Cleanup
-
-Once verified, you can remove the workflow file if you want to lock the repository as a permanent static archive.
 
 ---
 
