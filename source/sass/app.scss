@@ -54,24 +54,14 @@
   }
 
   #manifest-error { 
-    color: red; 
-    padding: 1rem;
-    top: 50%;
     position: absolute;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    z-index: 2000;
   }
-
-  #url {
-    font-family: monospace;
-    font-size: 0.9rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin-left: auto;
-    color: var(--color-text-muted);
-  }
-
   .field-container {
     display: flex;
     flex-direction: column;
@@ -94,7 +84,7 @@
   }
 
   #url-container {
-    margin-left: auto;
+    width: 100%;
   }
 
   #url-container .field {
@@ -102,8 +92,14 @@
     border: 1px solid var(--color-border-alt);
     cursor: default;
     user-select: all;
-    min-width: 200px;
-    max-width: 100%;
+    width: 100%;
+    font-family: monospace;
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--color-text-muted);
+    max-width: initial;
   }
 
   .cover-view {

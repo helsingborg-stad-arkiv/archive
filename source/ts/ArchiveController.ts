@@ -24,7 +24,8 @@ export class ArchiveController {
       this.restoreSelection();
       this.addListeners();
     } catch (err: any) {
-      document.body.innerHTML = `<div id="manifest-error">Could not load site index. Reason: ${err.message}</div>`;
+      const errorDiv = document.getElementById('manifest-error')!;
+      errorDiv.style.display = 'flex';
     }
   }
 
