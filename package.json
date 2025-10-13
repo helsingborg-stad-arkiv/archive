@@ -1,0 +1,64 @@
+{
+    "name": "github-archive-websites",
+    "version": "1.0.0",
+    "description": "Website Archiver for GitHub Pages",
+    "main": "",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/helsingborg-stad-arkiv/archive"
+    },
+    "author": "Sebastian Thulin",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/helsingborg-stad-arkiv/archive/issues"
+    },
+    "homepage": "https://github.com/helsingborg-stad-arkiv/archive",
+    "scripts": {
+        "test": "jest --coverage --maxWorkers=50%",
+        "dev": "vite",
+        "build": "vite build",
+        "build:dev": "vite build --mode development",
+        "watch": "vite build --watch --mode development",
+        "format": "npx biome format ./source",
+        "format:write": "npx biome format ./source --write",
+        "lint": "npx biome lint ./source",
+        "lint:write": "npx biome lint ./source --write"
+    },
+    "browserslist": [
+        "> 1%",
+        "not dead"
+    ],
+    "devDependencies": {
+        "@biomejs/biome": "2.2.2",
+        "@types/jest": "^30.0.0",
+        "autoprefixer": "^10.4.20",
+        "jest": "^30.1.3",
+        "jest-environment-jsdom": "^30.1.2",
+        "ts-jest": "^29.4.1",
+        "typescript": "^5.9.2",
+        "vite": "^7.1.2"
+    },
+    "jest": {
+        "testEnvironment": "jsdom",
+        "transform": {
+            "^.+\\.(js|ts)$": "ts-jest"
+        },
+        "collectCoverageFrom": [
+            "source/**/*.js",
+            "source/**/*.ts"
+        ],
+        "moduleFileExtensions": [
+            "js",
+            "ts"
+        ],
+        "testMatch": [
+            "**/*.test.(js|ts)"
+        ],
+        "transformIgnorePatterns": [
+            "node_modules/(?!(.*\\.mjs$))"
+        ]
+    },
+    "dependencies": {
+        "vite-config-factory": "^1.0.1"
+    }
+}
