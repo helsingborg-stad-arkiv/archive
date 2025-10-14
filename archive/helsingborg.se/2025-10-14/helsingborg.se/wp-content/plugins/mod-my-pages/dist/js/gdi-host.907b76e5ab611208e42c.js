@@ -1,0 +1,2 @@
+(()=>{"use strict";const{modMyPages:{restUrl:e}}=window;window.gdiHost={getAccessToken:()=>fetch(`${e}mod-my-pages/v1/access-token`,{method:"POST"}).then((e=>e.json())).then((({token:e,expires:o,decoded:s})=>({token:null!=e?e:"",expires:null!=o?o:0,decoded:null!=s?s:{}})))}})();
+//# sourceMappingURL=gdi-host.907b76e5ab611208e42c.js.map
