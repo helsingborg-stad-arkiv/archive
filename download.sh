@@ -88,7 +88,7 @@ wget \
   --page-requisites \
   --adjust-extension \
   --convert-links \
-  --span-hosts \
+  --no-span-hosts \
   --domains "$DOMAINS_OPTION" \
   --input-file "$TEMP_URLS_FILE" \
   --directory-prefix="$ARCHIVE_DIR" \
