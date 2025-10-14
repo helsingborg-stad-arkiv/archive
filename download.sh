@@ -124,13 +124,11 @@ echo "🌐 Found $URL_COUNT URLs to download..."
 # Download website and assets
 # -----------------------------------------
 wget \
-  --recursive \
-  --level=1 \
-  --no-clobber \
+  --no-recursive \
   --page-requisites \
   --adjust-extension \
   --convert-links \
-  --no-span-hosts \
+  --no-clobber \
   --domains "$DOMAINS_OPTION" \
   --input-file "$TEMP_URLS_FILE" \
   --directory-prefix="$ARCHIVE_DIR" \
