@@ -88,9 +88,9 @@ export class ArchiveController {
         style.id = 'unavailable-link-style';
         style.textContent = `
           .unavailable-link {
-            opacity: 0.5;
-            pointer-events: none;
-            text-decoration: line-through;
+            opacity: 0.5 !important;
+            pointer-events: none !important;
+            text-decoration: line-through !important;
           }
         `;
         doc.head.appendChild(style);
