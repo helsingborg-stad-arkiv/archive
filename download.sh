@@ -80,12 +80,29 @@ if [ -n "${MAX_DEPTH:-}" ] && [[ "$MAX_DEPTH" =~ ^[0-9]+$ ]]; then
 
   awk -v max_depth="$MAX_DEPTH" '
     {
-      url = $0
-      sub(/\?.*$/, "", url)    # Remove query string
-      sub(/#.*/, "", url)      # Remove fragment
-      sub(/\/$/, "", url)      # Remove trailing slash
-      depth = gsub(/[^\/]/, "", url) - 2  # Subtract 2 for protocol and domain
-      if (depth <= max_depth) print $0
+      orig = $0
+      url  = $0
+
+      # Remove query string and fragment for depth calculation
+      sub(/\?.*$/, "", url)
+      sub(/#.*/,   "", url)
+
+      # Remove trailing slash so https://d.com/ == https://d.com
+      sub(/\/$/, "", url)
+
+      # Ensure scheme present for consistent splitting (if missing, treat as http)
+      if (url !~ /^https?:\/\//) {
+        url = "http://" url
+      }
+
+      # Split on "/" -> parts: ["http:", "", "domain", "seg1", "seg2", ...]
+      n = split(url, parts, "/")
+
+      # Number of path segments is number of elements after the domain
+      depth = n - 3
+      if (depth < 0) depth = 0
+
+      if (depth <= max_depth) print orig
     }
   ' "$TEMP_URLS_FILE" | sort -u > "$FILTERED_URLS_FILE"
 
