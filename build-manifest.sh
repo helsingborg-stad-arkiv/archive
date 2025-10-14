@@ -15,6 +15,9 @@ for domain_dir in "$ARCHIVE_ROOT"/*/; do
   [ -d "$domain_dir" ] || continue
   domain=$(basename "$domain_dir")
 
+  # Skip assets directory
+  [[ "$domain" == "assets" ]] && continue
+
   # Skip the manifest itself
   [[ "$domain" == "index.json" ]] && continue
 
