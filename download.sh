@@ -72,17 +72,23 @@ else
 fi
 
 # -----------------------------------------
-# Max depth [n] filtering
+# Max depth [n] filtering (trailing slash safe)
 # -----------------------------------------
 if [ -n "${MAX_DEPTH:-}" ] && [[ "$MAX_DEPTH" =~ ^[0-9]+$ ]]; then
   echo "📏 Applying max depth filter: $MAX_DEPTH"
   FILTERED_URLS_FILE=$(mktemp)
-  awk -v max_depth="$MAX_DEPTH" -F/ '
+
+  awk -v max_depth="$MAX_DEPTH" '
     {
-      depth = gsub(/[^\/]/, "", $0) - 2; # Subtract 2 for protocol and domain
-      if (depth <= max_depth) print $0;
+      url = $0
+      sub(/\?.*$/, "", url)    # Remove query string
+      sub(/#.*/, "", url)      # Remove fragment
+      sub(/\/$/, "", url)      # Remove trailing slash
+      depth = gsub(/[^\/]/, "", url) - 2  # Subtract 2 for protocol and domain
+      if (depth <= max_depth) print $0
     }
   ' "$TEMP_URLS_FILE" | sort -u > "$FILTERED_URLS_FILE"
+
   mv "$FILTERED_URLS_FILE" "$TEMP_URLS_FILE"
 fi
 
