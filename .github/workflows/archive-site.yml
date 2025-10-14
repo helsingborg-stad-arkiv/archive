@@ -11,6 +11,10 @@ on:
         description: "Enter extra domains to include (comma-separated), e.g. media.example.com,cdn.example.com"
         required: false
         type: string
+      max_depth:
+        description: "Maximum page depth (default: 10)"
+        required: false
+        type: string
 
 jobs:
   archive:
@@ -32,6 +36,7 @@ jobs:
         env:
           SITE_URL: ${{ github.event.inputs.domain }}
           EXTRA_DOMAINS: ${{ github.event.inputs.extra_domains }}
+          MAX_DEPTH: ${{ github.event.inputs.max_depth }}
         run: |
           echo "Archiving: $SITE_URL"
           if [ -n "$EXTRA_DOMAINS" ]; then
@@ -46,6 +51,12 @@ jobs:
             IFS=',' read -ra EXTRA_DOMAINS_ARRAY <<< "$EXTRA_DOMAINS"
           fi
           export EXTRA_DOMAINS=("${EXTRA_DOMAINS_ARRAY[@]}")
+
+          # Set maximum depth for wget
+          if [ -z "$MAX_DEPTH" ]; then
+            MAX_DEPTH=10
+          fi
+          export MAX_DEPTH
 
           # Run the download script
           bash download.sh

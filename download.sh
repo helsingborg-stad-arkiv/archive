@@ -6,6 +6,7 @@ set -euo pipefail
 # -----------------------------------------
 SITE_URL="${SITE_URL:-}"
 EXTRA_DOMAINS_ENV="${EXTRA_DOMAINS:-}"
+MAX_DEPTH="${MAX_DEPTH:-}"
 
 if [ -z "$SITE_URL" ]; then
   echo "❌ SITE_URL not provided."
@@ -70,6 +71,24 @@ else
   fi
 fi
 
+# -----------------------------------------
+# Max depth [n] filtering
+# -----------------------------------------
+if [ -n "${MAX_DEPTH:-}" ] && [[ "$MAX_DEPTH" =~ ^[0-9]+$ ]]; then
+  echo "📏 Applying max depth filter: $MAX_DEPTH"
+  FILTERED_URLS_FILE=$(mktemp)
+  awk -v max_depth="$MAX_DEPTH" -F/ '
+    {
+      depth = gsub(/[^\/]/, "", $0) - 2; # Subtract 2 for protocol and domain
+      if (depth <= max_depth) print $0;
+    }
+  ' "$TEMP_URLS_FILE" | sort -u > "$FILTERED_URLS_FILE"
+  mv "$FILTERED_URLS_FILE" "$TEMP_URLS_FILE"
+fi
+
+# -----------------------------------------
+# Validate that we have URLs to process
+# -----------------------------------------
 URL_COUNT=$(wc -l < "$TEMP_URLS_FILE" | tr -d ' ')
 if [ "$URL_COUNT" -eq 0 ]; then
   echo "⚠️  No URLs found in sitemap. Aborting."
