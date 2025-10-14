@@ -76,6 +76,7 @@ Run once to permanently preserve a static version for archival or legal purposes
 ```bash
 SITE_URL="https://example.com" \
 EXTRA_DOMAINS=("media.example.com" "cdn.example.com") \
+MAX_DEPTH=1 \
 bash download.sh
 ```
 
