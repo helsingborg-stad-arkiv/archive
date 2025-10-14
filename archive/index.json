@@ -1,4 +1,6 @@
 {
+  "assets": ["dist"]
+,
   "dunkerskulturhus.se": ["2025-10-10"]
 ,
   "ekonomicoachen.helsingborg.se": ["2025-10-10"]
@@ -6,6 +8,8 @@
   "familjenhelsingborg.se": ["2025-10-10"]
 ,
   "foretagare.helsingborg.se": ["2025-10-10"]
+,
+  "helsingborg.se": ["2025-10-14"]
 ,
   "inhabithon.helsingborg.se": ["2025-10-11"]
 ,
