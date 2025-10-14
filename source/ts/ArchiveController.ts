@@ -81,8 +81,34 @@ export class ArchiveController {
     try {
       const doc = this.preview.contentDocument || this.preview.contentWindow?.document;
       if (!doc) return;
-      const links = doc.querySelectorAll('a[target="_blank"], a[target="_top"], a[target="_parent"]');
-      links.forEach(link => link.removeAttribute('target'));
+
+      // Inject CSS helper if not already present
+      if (!doc.getElementById('unavailable-link-style')) {
+        const style = doc.createElement('style');
+        style.id = 'unavailable-link-style';
+        style.textContent = `
+          .unavailable-link {
+            opacity: 0.5;
+            pointer-events: none;
+            text-decoration: line-through;
+          }
+        `;
+        doc.head.appendChild(style);
+      }
+
+      const links = doc.querySelectorAll('a[target="_blank"], a[target="_top"], a[target="_parent"], a');
+      links.forEach(link => {
+        link.removeAttribute('target');
+
+        const href = link.getAttribute('href');
+        if (!href) return;
+
+        // Disable non-relative links
+        if (/^https?:\/\//i.test(href)) {
+          link.classList.add('unavailable-link');
+          (link.style as any).pointerEvents = 'none';
+        }
+      });
     } catch {}
   }
 
